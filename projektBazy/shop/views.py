@@ -7,6 +7,9 @@ from .forms import ListingForm
 from django.contrib.auth.models import User  
 
 
+
+#none of those mater, but i havent finished the change to api 
+
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
