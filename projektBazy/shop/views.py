@@ -30,7 +30,7 @@ def user_login(request):
             return render(request, 'login.html', {'error': 'Invalid login credentials'})
     return render(request, 'login.html')
 
-
+#random comment to test git
 def user_logout(request):
     logout(request)
     return redirect('home')  
