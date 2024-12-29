@@ -29,7 +29,7 @@ class Address(models.Model):
     street = models.CharField(max_length=63)
     postal_code = models.IntegerField()
     building_number = models.IntegerField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')   
+    resident = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='addresses')   
 
     def __str__(self):
         return f"street and number: {self.building_number} {self.street}, city: {self.town}, country: {self.country}"
