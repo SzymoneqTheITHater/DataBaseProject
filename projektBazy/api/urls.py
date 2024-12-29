@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ListingsView
+from .views import ListingsView, UserAddressesView
 from . import views
 urlpatterns = [
     path('',views.getData),
@@ -9,13 +9,19 @@ urlpatterns = [
     path('signup/', views.signup),
     path('test_token/', views.test_token),
     path('logout/', views.logout),
+    #{ "title":"Toa gali","description":"Does it count as water toy?","price":50,"location":"wroclaw","category":1 }
     path('postListing/', views.post_listing),
     path('postAddress/', views.add_address),
     #/listings/user/1/category/2/
     path('listings/user/<int:user_id>/category/<int:category_id>/', ListingsView.as_view(), name='user-category-listings'),
     #/listings/user/1/ np
-    path('listings/user/<int:user_id>/', ListingsView.as_view(), name='user-listings'),    #/listings/category/2/
+    path('listings/user/<int:user_id>/', ListingsView.as_view(), name='user-listings'),   
+      #/listings/category/2/
     path('listings/category/<int:category_id>/', ListingsView.as_view(), name='category-listings'),
+    #/user/1/addresses
+    path('user/<int:user_id>/addresses/', UserAddressesView.as_view(), name='user-addresses'),
+    path('transactions/', views.create_transaction, name='create-transaction'),
+    path('transactions/<int:transaction_id>/update/', views.update_transaction_status, name='update-transaction-status'),
 
 ]
 #Do something like this to test it

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from shop.models import Category, Listing, Address
+from shop.models import Category, Listing, Address, Transaction
 from django.contrib.auth.models import User
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Listing
-        fields = ['title', 'description', 'price', 'location', 'category', 'id']
+        fields = ['title', 'description', 'price', 'location','created_at', 'category', 'id']
 
     def create(self, validated_data):
         validated_data['seller'] = self.context['request'].user
@@ -31,4 +31,26 @@ class AdressSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['resident'] = self.context['request'].user
         return super().create(validated_data) 
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ['listing', 'seller', 'buyer', 'transaction_date', 'status']
+        read_only_fields = ['seller', 'buyer', 'transaction_date']  
+    
+    def create(self, validated_data):
+        
+        listing = validated_data['listing']
+        buyer = self.context['request'].user  
+        
+        
+        seller = listing.seller
+        
+        
+        transaction = Transaction.objects.create(
+            listing=listing,
+            seller=seller,
+            buyer=buyer
+        )
+        return transaction
 

@@ -1,16 +1,16 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from shop.models import Category, Listing, Address
+from shop.models import Category, Listing, Address, Transaction
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CategorySerializer, ListingSerializer, UserSerializer, AdressSerializer
+from .serializers import CategorySerializer, ListingSerializer, UserSerializer, AdressSerializer, TransactionSerializer
 from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
-
+#unnessesary
 @api_view(['GET'])
 def getCategory(request):
     categories = Category.objects.all()
@@ -26,7 +26,7 @@ def getData(request):
     
     
     return Response(serializer.data)
-
+#also unnessesary, user shouldnt be able to add categories, its just for testing 
 @api_view(['POST'])
 def addCategory(request):
 
@@ -47,7 +47,7 @@ def signup(request):
         return Response({"token": token.key, "user": serializer.data})
     return Response({serializer.errors})
 
-
+#needs work to stay loged in idk got lost in it 
 @api_view(['POST'])
 def login(request):
     user=get_object_or_404(User, username=request.data['username'])
@@ -136,6 +136,78 @@ class ListingsView(generics.ListAPIView):
             
             return Listing.objects.filter(seller=user, category=category)
     
+
+class UserAddressesView(generics.ListAPIView):
+    serializer_class = AdressSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs.get('user_id')
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise NotFound("User not found")
+
+        return Address.objects.filter(resident=user)
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def create_transaction(request):
+    if request.method == 'POST':
+
+        listing_id = request.data.get('listing')
+
+        try:
+            listing = Listing.objects.get(id=listing_id)
+        except Listing.DoesNotExist:
+            return Response({'detail': 'Listing not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if listing.seller == request.user:
+            return Response({'detail': 'You cannot buy your own listing'}, status=status.HTTP_400_BAD_REQUEST)
+
+        data = {
+            'listing': listing_id,
+        }
+
+        serializer = TransactionSerializer(data=data, context={'request': request})
+
+        if serializer.is_valid():
+            transaction = serializer.save(seller=listing.seller)
+            return Response(TransactionSerializer(transaction).data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+#before i forget, patch only sends the data that is changed, so the objcet must be created before, i think you can create with put.
+@api_view(['PATCH'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update_transaction_status(request, transaction_id):
+    try:
+        transaction = Transaction.objects.get(id=transaction_id)
+    except Transaction.DoesNotExist:
+        return Response({'detail': 'Transaction not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.user == transaction.seller:
+        allowed_status = [Transaction.PENDING, Transaction.COMPLETED, Transaction.CANCELLED]  # Sprzedawca może zmieniać na "completed"
+    else:
+        return Response({'detail': 'You do not have permission to update this transaction.'}, status=status.HTTP_403_FORBIDDEN)
+
+    new_status = request.data.get('status')
+    if new_status not in dict(Transaction.STATUS_CHOICES).keys():
+        return Response({'detail': 'Invalid status.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    if new_status not in allowed_status:
+        return Response({'detail': 'You cannot change the status to this value.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    transaction.status = new_status
+    transaction.save()
+
+    return Response(TransactionSerializer(transaction).data, status=status.HTTP_200_OK)
+
+
     
 
     
