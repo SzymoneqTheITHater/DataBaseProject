@@ -1,4 +1,5 @@
 from django.urls import path
+from .views import ListingsView
 from . import views
 urlpatterns = [
     path('',views.getData),
@@ -10,6 +11,12 @@ urlpatterns = [
     path('logout/', views.logout),
     path('postListing/', views.post_listing),
     path('postAddress/', views.add_address),
+    #/listings/user/1/category/2/
+    path('listings/user/<int:user_id>/category/<int:category_id>/', ListingsView.as_view(), name='user-category-listings'),
+    #/listings/user/1/ np
+    path('listings/user/<int:user_id>/', ListingsView.as_view(), name='user-listings'),    #/listings/category/2/
+    path('listings/category/<int:category_id>/', ListingsView.as_view(), name='category-listings'),
+
 ]
 #Do something like this to test it
 #http://127.0.0.1:8000/postAddress/

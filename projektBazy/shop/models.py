@@ -17,9 +17,7 @@ class Category(models.Model):
     number_of_items=models.IntegerField()
 
     
-    def update_number_of_items(self):
-        self.number_of_items = self.listings.count()
-        self.save()
+    
     def __str__(self):
         return (f"{self.category_name}, total:{self.number_of_items}")
 

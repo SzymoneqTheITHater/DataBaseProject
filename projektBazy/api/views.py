@@ -1,10 +1,12 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from shop.models import Category, Listing, Address
-
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from .serializers import CategorySerializer, ListingSerializer, UserSerializer, AdressSerializer
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import NotFound
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
@@ -56,9 +58,6 @@ def login(request):
     return Response({"token": token.key, "user": serializer.data})
 
 
-from rest_framework.decorators import authentication_classes, permission_classes
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -101,3 +100,43 @@ def add_address(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ListingsView(generics.ListAPIView):
+    serializer_class = ListingSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs.get('user_id') 
+        category_id = self.kwargs.get('category_id')
+
+        if user_id and not category_id:        
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                raise NotFound("User not found")
+
+            return Listing.objects.filter(seller=user)
+        if category_id and not user_id:
+            try:
+                category = Category.objects.get(id=category_id)
+            except Category.DoesNotExist:
+                raise NotFound("Category not found")
+            category.number_of_items = Listing.objects.filter(category=category).count()
+            category.save()
+            return Listing.objects.filter(category=category)
+        if user_id and category_id:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                raise NotFound("User not found")
+            
+            try:
+                category = Category.objects.get(id=category_id)
+            except Category.DoesNotExist:
+                raise NotFound("Category not found")
+            
+            return Listing.objects.filter(seller=user, category=category)
+    
+    
+
+    
+    
