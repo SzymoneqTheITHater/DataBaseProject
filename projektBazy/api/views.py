@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from shop.models import Category, Listing, Address, Transaction
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CategorySerializer, ListingSerializer, UserSerializer, AdressSerializer, TransactionSerializer
+from .serializers import CategorySerializer, ListingSerializer, UserSerializer, AdressSerializer, TransactionSerializer, MessageSerializer, ChatSerializer
 from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound
