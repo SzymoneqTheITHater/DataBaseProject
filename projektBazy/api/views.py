@@ -88,8 +88,14 @@ def post_listing(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+class CreateListingView(generics.CreateAPIView):
+    queryset = Listing.objects.all()
+    serializer_class = ListingSerializer
+    permission_classes = [IsAuthenticated]
+    def perform_create(self, serializer):
+        serializer.save()
 
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -190,7 +196,7 @@ def update_transaction_status(request, transaction_id):
         return Response({'detail': 'Transaction not found'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.user == transaction.seller:
-        allowed_status = [Transaction.PENDING, Transaction.COMPLETED, Transaction.CANCELLED]  # Sprzedawca może zmieniać na "completed"
+        allowed_status = [Transaction.PENDING, Transaction.COMPLETED, Transaction.CANCELLED]  
     else:
         return Response({'detail': 'You do not have permission to update this transaction.'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -203,10 +209,40 @@ def update_transaction_status(request, transaction_id):
         return Response({'detail': 'You cannot change the status to this value.'}, status=status.HTTP_400_BAD_REQUEST)
 
     transaction.status = new_status
+    if new_status == Transaction.COMPLETED:
+        transaction.listing.state = Listing.BOUGHT  
+    elif new_status == Transaction.CANCELLED:
+        transaction.listing.state = Listing.ACTIVE  
+    elif new_status == Transaction.PENDING:
+        transaction.listing.state = Listing.PENDING
+
+
+
     transaction.save()
+    transaction.listing.save()
 
     return Response(TransactionSerializer(transaction).data, status=status.HTTP_200_OK)
 
+@api_view(['PATCH'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def cancel_listing(request, listing_id):
+    try:
+        listing = Listing.objects.get(id=listing_id)
+    except Listing.DoesNotExist:
+        return Response({'detail': 'Listing not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.user != listing.seller:
+        return Response({'detail': 'You do not have permission to cancel this listing.'}, status=status.HTTP_403_FORBIDDEN)
+
+    if listing.state != Listing.ACTIVE:
+        return Response({'detail': 'This listing cannot be cancelled because it is not active.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    listing.state = Listing.CANCELLED
+    listing.save()
+
+    serializer = ListingSerializer(listing)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
     
 

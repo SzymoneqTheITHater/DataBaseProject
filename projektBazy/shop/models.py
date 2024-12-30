@@ -2,6 +2,17 @@ from django.db import models
 from django.contrib.auth.models import User  
 
 class Listing(models.Model):
+    ACTIVE = 'active'
+    BOUGHT = 'bought'
+    PENDING = 'pending'
+    CANCELLED = 'cancelled'
+
+    STATE_CHOICES = [
+        (ACTIVE, 'Active'),
+        (BOUGHT, 'Bought'),
+        (PENDING, 'Pending'),
+        (CANCELLED, 'Cancelled'),
+    ]
     title = models.CharField(max_length=255)
     description = models.TextField()
     price = models.FloatField()
@@ -10,7 +21,9 @@ class Listing(models.Model):
     isActive = models.BooleanField(default=True)
     category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, blank=True, related_name='listings')
     created_at = models.DateTimeField(auto_now_add=True)
+    state = models.CharField(max_length=10, choices=STATE_CHOICES, default=ACTIVE)
     
+    image = models.ImageField(upload_to='listings/images/', null=True, blank=True)
     #actually i dont think i need this anymore, but lets leave it for now (leftover from forms->api switch)
     def __str__(self):
         return self.title
@@ -25,6 +38,7 @@ class Category(models.Model):
         return (f"{self.category_name}, total:{self.number_of_items}")
 
 class Address(models.Model):
+    
     country = models.CharField(max_length=63)
     town = models.CharField(max_length=63)
     street = models.CharField(max_length=63)
