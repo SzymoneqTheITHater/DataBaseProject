@@ -208,7 +208,82 @@ def update_transaction_status(request, transaction_id):
     return Response(TransactionSerializer(transaction).data, status=status.HTTP_200_OK)
 
 
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_chat_message(request, chat_id, listing_id):
+    if request.method == 'POST':
+        try:
+            listing = Listing.objects.get(id=listing_id)
+        except Listing.DoesNotExist:
+            return Response({'detail': 'Listing not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            chat = Chat.objects.get(id=chat_id)
+        except Chat.DoesNotExist:
+            chat = None
+                        
+        if chat is None:
+            try:
+                newChat = {
+                    'buyer': request.user,
+                    'seller': listing.seller,
+                    'listing': listing
+                }
+                chat_serializer = ChatSerializer(data=newChat, context={'request': request})
+                if chat_serializer.is_valid():
+                    chat_serializer.save()
+                    chat = Chat.objects.get(id=chat_id)
+            
+            except Exception as e:
+                return Response({'detail': 'Unable to create chat'}, status=status.HTTP_409_CONFLICT)
+
+        new_message = {
+            'content' : request.data.get('message')
+        }
+
+        message_serializer = MessageSerializer(data=new_message, context={'request': request})
+
+        if message_serializer.is_valid():
+            message_serializer.save(chat=chat)
+            return Response(message_serializer.data, status=status.HTTP_201_CREATED)
     
+    return Response(message_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_chats(request, listing_id):
+    try:
+        listing = Listing.objects.get(id=listing_id)
+    except Listing.DoesNotExist:
+        return Response({'detail': 'Listing not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    chats = Chat.objects.filter(listing=listing_id)
+    serializer = ChatSerializer(chats, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def get_messages(request, chat_id):
+    try:
+        chat = Chat.objects.get(id=chat_id)
+    except Chat.DoesNotExist:
+        return Response({'detail': 'Chat not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    messages = Message.objects.filter(chat=chat)
+    serializer = MessageSerializer(messages, many=True)
+    return Response(serializer.data)
+
+@api_view(['PATCH'])
+def set_message_viewed(request, message_id):
+    try:
+        message = Message.objects.get(id=message_id)
+        message.status = Message.Viewed
+        message.save()
+    except Message.DoesNotExist:
+        return Response({'detail': 'Message not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'detail': 'Unable to update'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return Response(MessageSerializer(message).data)    
 
     
     

@@ -22,7 +22,11 @@ urlpatterns = [
     path('user/<int:user_id>/addresses/', UserAddressesView.as_view(), name='user-addresses'),
     path('transactions/', views.create_transaction, name='create-transaction'),
     path('transactions/<int:transaction_id>/update/', views.update_transaction_status, name='update-transaction-status'),
-
+#/addmessage/1/1
+    path('addmessage/<int:chat_id>/<int:listing_id>', views.add_chat_message, name='add-chat-message'),
+    path('chats/<int:listing_id>', views.get_chats, name='listing-chats'),
+    path('messages/<int:chat_id>', views.get_messages, name='chat-messages'),
+    path('viewedmessage/<int:message_id>', views.set_message_viewed, name='message-viewed'),
 ]
 #Do something like this to test it
 #http://127.0.0.1:8000/postAddress/

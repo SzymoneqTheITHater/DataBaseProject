@@ -63,4 +63,27 @@ class Transaction(models.Model):
     def __str__(self):
         return f"Transaction between {self.seller.username} and {self.buyer.username} for {self.listing.title} curently {self.status}"
 
-    
+class Chat(models.Model):
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chats_as_buyer', to_field='id')  
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chats_as_seller', to_field='id')  
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='chats', to_field='id')  
+
+    class Meta:
+        unique_together=("buyer", "seller", "listing")
+
+
+class Message(models.Model):
+    Sent = 'sent'
+    Viewed = 'Viewed'
+
+    STATUS_CHOICES = [
+        (Sent, 'Sent'),
+        (Viewed, 'Viewed'),
+    ]
+
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='messages', to_field='id')  
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chats', to_field='id')  
+    content = models.TextField()
+    status = models.CharField(max_length=6, choices=STATUS_CHOICES, default=Sent)
+    created_at = models.DateTimeField(auto_now_add=True)
+    viewed_at = models.DateTimeField(default=None, blank=True, null=True)   
