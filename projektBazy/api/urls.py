@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ListingsView, UserAddressesView
+from .views import ListingsView, UserAddressesView, ReviewViewSet
 from . import views
 urlpatterns = [
     path('',views.getData),
@@ -27,6 +27,11 @@ urlpatterns = [
     path('chats/<int:listing_id>', views.get_chats, name='listing-chats'),
     path('messages/<int:chat_id>', views.get_messages, name='chat-messages'),
     path('viewedmessage/<int:message_id>', views.set_message_viewed, name='message-viewed'),
+    #nwm
+    path('reviews/', ReviewViewSet.as_view({'get': 'list', 'post': 'create'}), name='review-list-create'),
+    path('reviews/<int:pk>/', ReviewViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='review-detail'),
+    path('reviews/<int:pk>/user-reviews/', ReviewViewSet.as_view({'get': 'user_reviews'}), name='user-reviews'),
+    path('reviews/<int:pk>/average-rating/', ReviewViewSet.as_view({'get': 'average_rating'}), name='average-rating'),
 ]
 #Do something like this to test it
 #http://127.0.0.1:8000/postAddress/

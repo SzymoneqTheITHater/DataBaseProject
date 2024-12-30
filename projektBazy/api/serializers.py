@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from shop.models import Category, Listing, Address, Transaction, Message, Chat
+from shop.models import Category, Listing, Address, Transaction, Message, Chat, Review
 from django.contrib.auth.models import User
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -90,3 +90,7 @@ class MessageSerializer(serializers.ModelSerializer):
         )   
         return message
 
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id', 'listing', 'reviewer', 'reviewee', 'rating', 'comment', 'created_at']

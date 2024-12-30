@@ -86,4 +86,12 @@ class Message(models.Model):
     content = models.TextField()
     status = models.CharField(max_length=6, choices=STATUS_CHOICES, default=Sent)
     created_at = models.DateTimeField(auto_now_add=True)
-    viewed_at = models.DateTimeField(default=None, blank=True, null=True)   
+    viewed_at = models.DateTimeField(default=None, blank=True, null=True)
+
+class Review(models.Model):
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews_given')
+    reviewee = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews_received')
+    rating = models.IntegerField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)   

@@ -1,15 +1,17 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from shop.models import Category, Listing, Address, Transaction
+from shop.models import Category, Listing, Address, Transaction, Message, Chat, Review
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CategorySerializer, ListingSerializer, UserSerializer, AdressSerializer, TransactionSerializer, MessageSerializer, ChatSerializer
+from .serializers import CategorySerializer, ListingSerializer, UserSerializer, AdressSerializer, TransactionSerializer, MessageSerializer, ChatSerializer, ReviewSerializer
 from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from django.db.models import Avg
 #unnessesary
 @api_view(['GET'])
 def getCategory(request):
@@ -285,5 +287,43 @@ def set_message_viewed(request, message_id):
 
     return Response(MessageSerializer(message).data)    
 
-    
-    
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+    def create(self, request, *args, **kwargs):
+        reviewer = request.user
+        listing_id = request.data.get('listing')
+        reviewee_id = request.data.get('reviewee')
+
+        try:
+            listing = Listing.objects.get(id=listing_id)
+            if listing.seller == reviewer:
+               return Response({"error": "You can only review users for listings you purchased."}, status=status.HTTP_403_FORBIDDEN)
+            if listing.seller.id != int(reviewee_id):
+                return Response({"error": "Reviewee must be the seller of the purchased listing."}, status=status.HTTP_400_BAD_REQUEST)
+        except Listing.DoesNotExist:
+            return Response({"error": "Listing does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.reviewer != request.user:
+            return Response({"error": "You can only update your own reviews."}, status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    @action(detail=True, methods=['get'], url_path='user-reviews')
+    def user_reviews(self, request, pk=None):
+        user = User.objects.get(pk=pk)
+        reviews = Review.objects.filter(reviewee=user)
+        serializer = self.get_serializer(reviews, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'], url_path='average-rating')
+    def average_rating(self, request, pk=None):
+        user = User.objects.get(pk=pk)
+        average_rating = Review.objects.filter(reviewee=user).aggregate(Avg('rating'))['rating__avg']
+        return Response({"average_rating": average_rating})
+   
+   
