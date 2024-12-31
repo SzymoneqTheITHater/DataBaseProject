@@ -90,12 +90,12 @@ WSGI_APPLICATION = 'projektBazy.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # Używamy MySQL jako backend (MariaDB jest kompatybilne)
-        'NAME': 'shopDB',  # Nazwa Twojej bazy danych
-        'USER': '272561',  # Użytkownik bazy danych
-        'PASSWORD': 'osboxes.org',  # Hasło do bazy danych
-        'HOST': 'localhost',  # Adres serwera bazy danych
-        'PORT': '3306',  # Domyślny port dla MariaDB/MySQL
+        'ENGINE': 'django.db.backends.mysql', 
+        'NAME': 'shopDB',  
+        'USER': '272561',  
+        'PASSWORD': 'osboxes.org',  #
+        'HOST': 'localhost',  
+        'PORT': '3306',  
     }
 }
 

@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Listing
-        fields = ['title', 'description', 'price', 'location','created_at', 'category', 'id', 'state', 'image']
+        fields = ['title', 'description', 'price', 'location','created_at', 'category', 'id', 'state', 'image', "seller"]
     def create(self, validated_data):
         validated_data['seller'] = self.context['request'].user
         return super().create(validated_data)
@@ -35,7 +35,7 @@ class AdressSerializer(serializers.ModelSerializer):
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ['listing', 'seller', 'buyer', 'transaction_date', 'status']
+        fields = ['listing', 'seller', 'buyer', 'transaction_date', 'status','id']
         read_only_fields = ['seller', 'buyer', 'transaction_date']  
     
     def create(self, validated_data):
