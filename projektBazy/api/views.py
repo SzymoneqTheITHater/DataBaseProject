@@ -10,7 +10,7 @@ from rest_framework.exceptions import NotFound
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
-#unnessesary
+
 @api_view(['GET'])
 def getCategory(request):
     categories = Category.objects.all()
@@ -35,17 +35,38 @@ def addCategory(request):
         serializer.save()
     return Response(serializer.data)
 
+#@api_view(['POST'])
+#def signup(request):
+#    serializer=UserSerializer(data=request.data)
+#    if serializer.is_valid():
+#        serializer.save()
+#        user=User.objects.get(username=request.data['username'])
+#        user.set_password(request.data['password'])
+#        user.save()
+#        token=Token.objects.create(user=user)
+#        return Response({"token": token.key, "user": serializer.data})
+#    return Response({serializer.errors})
 @api_view(['POST'])
 def signup(request):
-    serializer=UserSerializer(data=request.data)
+    serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        user=User.objects.get(username=request.data['username'])
+        user = serializer.save()
+        # Ustawiamy hasło bezpośrednio podczas tworzenia użytkownika
         user.set_password(request.data['password'])
         user.save()
-        token=Token.objects.create(user=user)
-        return Response({"token": token.key, "user": serializer.data})
-    return Response({serializer.errors})
+        
+        # Tworzymy token
+        token, created = Token.objects.get_or_create(user=user)
+        
+        # Logujemy użytkownika
+        login(request, user)
+        
+        return Response({
+            "token": token.key,
+            "user": serializer.data
+        }, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 #needs work to stay loged in idk got lost in it 
 @api_view(['POST'])
@@ -57,6 +78,35 @@ def login(request):
     serializer=UserSerializer(instance=user)
     return Response({"token": token.key, "user": serializer.data})
 
+
+@api_view(['POST'])
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    if not username or not password:
+        return Response({
+            'error': 'Please provide both username and password'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    user = get_object_or_404(User, username=username)
+    
+    if not user.check_password(password):
+        return Response({
+            'error': 'Invalid credentials'
+        }, status=status.HTTP_401_UNAUTHORIZED)
+    
+    # Logujemy użytkownika używając oryginalnego request._request
+    login(request, user)
+    
+    # Pobieramy lub tworzymy token
+    token, created = Token.objects.get_or_create(user=user)
+    serializer = UserSerializer(instance=user)
+    
+    return Response({
+        "token": token.key,
+        "user": serializer.data
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

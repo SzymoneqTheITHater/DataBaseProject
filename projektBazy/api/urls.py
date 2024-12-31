@@ -28,6 +28,7 @@ urlpatterns = [
 
 
     path('listings/create/', CreateListingView.as_view(), name='create-listing'),
+    
 ]
 #Do something like this to test it
 #http://127.0.0.1:8000/postAddress/

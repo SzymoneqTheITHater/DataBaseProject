@@ -1,0 +1,13 @@
+POST http://127.0.0.1:8000/login/
+Content-Type:application/json
+
+{"username":"MarekZywer","password":"winnica123"}
+
+
+###
+
+GET http://127.0.0.1:8000/test_token
+Content-Type:  application/json
+Authorization: Token  e4b5cf51d9bfec06bcf98011438a35a208a504f4
+
+{}
