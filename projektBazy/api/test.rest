@@ -1,0 +1,75 @@
+
+GET http://127.0.0.1:8000/
+Content-Type: application/json
+
+###
+GET http://127.0.0.1:8000/listings/category/2/
+Content-Type: application/json
+
+###
+GET http://127.0.0.1:8000/listings/user/4/
+Content-Type: application/json
+
+###
+GET http://127.0.0.1:8000/listings/user/4/category/2/
+Content-Type: application/json
+
+###
+
+POST http://127.0.0.1:8000/signup/
+Content-Type: application/json
+
+{"username":"thomas_light","password":"protoman123", "email":"nice@gmail.com"}
+
+###
+POST http://127.0.0.1:8000/login/
+Content-Type:application/json
+
+
+{"username":"thomas_light","password":"protoman123"}
+
+
+###
+
+GET http://127.0.0.1:8000/test_token
+Content-Type:  application/json
+Authorization: Token  a83b082b8c70f390b9fc11b9c9d9ed627a2aa8fb
+
+{}
+###
+POST http://127.0.0.1:8000/postAddress/
+Content-Type: application/json
+Authorization: Token  a83b082b8c70f390b9fc11b9c9d9ed627a2aa8fb
+
+
+{"country":"Poland","town":"wroclaw","street":"szkolna","postal_code":57123,"building_number":4}
+
+
+###
+GET http://127.0.0.1:8000/user/10/addresses/
+Content-Type:  application/json
+Authorization: Token  a83b082b8c70f390b9fc11b9c9d9ed627a2aa8fb
+
+{}
+
+
+###
+POST http://127.0.0.1:8000/transactions/
+Content-Type: application/json
+Authorization: Token  a83b082b8c70f390b9fc11b9c9d9ed627a2aa8fb
+
+{"listing":2}
+### 314bdeedf9730c7c9cce29eb3617ca5c23ecfbc5
+
+PATCH http://127.0.0.1:8000/transactions/16/update/
+Content-Type: application/json
+Authorization: Token  314bdeedf9730c7c9cce29eb3617ca5c23ecfbc5
+
+{"status":"completed"}
+
+###
+PATCH http://127.0.0.1:8000/transactions/17/update/
+Content-Type: application/json
+Authorization: Token  314bdeedf9730c7c9cce29eb3617ca5c23ecfbc5
+
+{"status":"cancelled"}
