@@ -9,6 +9,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
 
 
 @api_view(['GET'])
@@ -18,7 +19,7 @@ def getCategory(request):
     
     
     return Response(serializer.data)
-
+@swagger_auto_schema(methods=['get'], responses={200: ListingSerializer(many=True)})
 @api_view(['GET'])
 def getData(request):
     listings = Listing.objects.all()
@@ -35,40 +36,19 @@ def addCategory(request):
         serializer.save()
     return Response(serializer.data)
 
-#@api_view(['POST'])
-#def signup(request):
-#    serializer=UserSerializer(data=request.data)
-#    if serializer.is_valid():
-#        serializer.save()
-#        user=User.objects.get(username=request.data['username'])
-#        user.set_password(request.data['password'])
-#        user.save()
-#        token=Token.objects.create(user=user)
-#        return Response({"token": token.key, "user": serializer.data})
-#    return Response({serializer.errors})
 @api_view(['POST'])
 def signup(request):
-    serializer = UserSerializer(data=request.data)
+    serializer=UserSerializer(data=request.data)
     if serializer.is_valid():
-        user = serializer.save()
-        # Ustawiamy hasło bezpośrednio podczas tworzenia użytkownika
+        serializer.save()
+        user=User.objects.get(username=request.data['username'])
         user.set_password(request.data['password'])
         user.save()
-        
-        # Tworzymy token
-        token, created = Token.objects.get_or_create(user=user)
-        
-        # Logujemy użytkownika
-        login(request, user)
-        
-        return Response({
-            "token": token.key,
-            "user": serializer.data
-        }, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        token=Token.objects.create(user=user)
+        return Response({"token": token.key, "user": serializer.data})
+    return Response({serializer.errors})
 
 
-#needs work to stay loged in idk got lost in it 
 @api_view(['POST'])
 def login(request):
     user=get_object_or_404(User, username=request.data['username'])
@@ -77,36 +57,6 @@ def login(request):
     token, created= Token.objects.get_or_create(user=user)
     serializer=UserSerializer(instance=user)
     return Response({"token": token.key, "user": serializer.data})
-
-
-@api_view(['POST'])
-def login_view(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-    
-    if not username or not password:
-        return Response({
-            'error': 'Please provide both username and password'
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-    user = get_object_or_404(User, username=username)
-    
-    if not user.check_password(password):
-        return Response({
-            'error': 'Invalid credentials'
-        }, status=status.HTTP_401_UNAUTHORIZED)
-    
-    # Logujemy użytkownika używając oryginalnego request._request
-    login(request, user)
-    
-    # Pobieramy lub tworzymy token
-    token, created = Token.objects.get_or_create(user=user)
-    serializer = UserSerializer(instance=user)
-    
-    return Response({
-        "token": token.key,
-        "user": serializer.data
-    }, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -129,6 +79,8 @@ def logout(request):
     
 #To test those go login in http://127.0.0.1:8000/admin/   username osboxes password osboxes.org i think that the database and all paswords go through git??? not sure, if not create admin yourself. actually i dont think it goes to git but still, you can make a admin by yourself. 
 #anyway, when you log as admin you can go back to the other urls and test all of those, and add more and stuff
+#i dont think i understand to good swagger yet :()
+@swagger_auto_schema(methods=['post'], request_body=ListingSerializer, responses={201: ListingSerializer})
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
