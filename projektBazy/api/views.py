@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from django.db.models import Avg
+from datetime import datetime
 #unnessesary
 @api_view(['GET'])
 def getCategory(request):
@@ -222,10 +223,17 @@ def add_chat_message(request, chat_id, listing_id):
         
         try:
             chat = Chat.objects.get(id=chat_id)
+            if chat.listing_id != listing.id:
+                return Response({'detail': 'Invalid chat for the listing'}, status=status.HTTP_400_BAD_REQUEST)
+        
         except Chat.DoesNotExist:
             chat = None
                         
         if chat is None:
+            
+            if request.user.id == listing.seller.id:
+                return Response({'detail': 'Seller can not start the chat'}, status=status.HTTP_400_BAD_REQUEST)
+            
             try:
                 newChat = {
                     'buyer': request.user,
@@ -234,8 +242,7 @@ def add_chat_message(request, chat_id, listing_id):
                 }
                 chat_serializer = ChatSerializer(data=newChat, context={'request': request})
                 if chat_serializer.is_valid():
-                    chat_serializer.save()
-                    chat = Chat.objects.get(id=chat_id)
+                   chat = chat_serializer.save(seller=listing.seller, buyer=request.user, listing=listing)
             
             except Exception as e:
                 return Response({'detail': 'Unable to create chat'}, status=status.HTTP_409_CONFLICT)
@@ -279,6 +286,7 @@ def set_message_viewed(request, message_id):
     try:
         message = Message.objects.get(id=message_id)
         message.status = Message.Viewed
+        message.viewed_at = datetime.now()
         message.save()
     except Message.DoesNotExist:
         return Response({'detail': 'Message not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -309,8 +317,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.reviewer != request.user:
-            return Response({"error": "You can only update your own reviews."}, status=status.HTTP_403_FORBIDDEN)
+     #   if instance.reviewer != request.user:
+     #       return Response({"error": "You can only update your own reviews."}, status=status.HTTP_403_FORBIDDEN)
         return super().update(request, *args, **kwargs)
 
     @action(detail=True, methods=['get'], url_path='user-reviews')
@@ -327,3 +335,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return Response({"average_rating": average_rating})
    
    
+
+
+@api_view(['GET'])
+def get_listing(request, listing_id):
+    try:
+        listing = Listing.objects.get(id=listing_id)
+        serializer = ListingSerializer(listing)
+        return Response(serializer.data)
+    except Listing.DoesNotExist:
+        return Response({'detail': 'Listing not found'}, status=status.HTTP_404_NOT_FOUND)
+    
