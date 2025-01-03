@@ -19,27 +19,27 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/signup/
 Content-Type: application/json
 
-{"username":"thomas_light","password":"protoman123", "email":"nice@gmail.com"}
+{"username":"albertWily","password":"yellowDevil", "email":"bad@gmail.com"}
 
 ###
 POST http://127.0.0.1:8000/login/
 Content-Type:application/json
 
 
-{"username":"thomas_light","password":"protoman123"}
+{"username":"albertWily","password":"yellowDevil"}
 
 
-###
+### token must be changed manuall, same goes with stuff lie transactions id
 
-GET http://127.0.0.1:8000/test_token
+GET http://127.0.0.1:8000/test_token 
 Content-Type:  application/json
-Authorization: Token  a83b082b8c70f390b9fc11b9c9d9ed627a2aa8fb
+Authorization: Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM1ODk5NTk0LCJpYXQiOjE3MzU4OTkyOTQsImp0aSI6IjczYzVhMDRjYjJjMjRlYjM5NjUwMDYyZDI3OTA4MjUxIiwidXNlcl9pZCI6MTF9.Alc51Fs6LFFe8rEP8nn_BVmYMpywtk41yk0o9Lp3OpU
 
 {}
 ###
 POST http://127.0.0.1:8000/postAddress/
 Content-Type: application/json
-Authorization: Token  a83b082b8c70f390b9fc11b9c9d9ed627a2aa8fb
+Authorization: Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM1ODk5NTk0LCJpYXQiOjE3MzU4OTkyOTQsImp0aSI6IjczYzVhMDRjYjJjMjRlYjM5NjUwMDYyZDI3OTA4MjUxIiwidXNlcl9pZCI6MTF9.Alc51Fs6LFFe8rEP8nn_BVmYMpywtk41yk0o9Lp3OpU
 
 
 {"country":"Poland","town":"wroclaw","street":"szkolna","postal_code":57123,"building_number":4}
@@ -48,7 +48,7 @@ Authorization: Token  a83b082b8c70f390b9fc11b9c9d9ed627a2aa8fb
 ###
 GET http://127.0.0.1:8000/user/10/addresses/
 Content-Type:  application/json
-Authorization: Token  a83b082b8c70f390b9fc11b9c9d9ed627a2aa8fb
+Authorization: Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM1ODk5NTk0LCJpYXQiOjE3MzU4OTkyOTQsImp0aSI6IjczYzVhMDRjYjJjMjRlYjM5NjUwMDYyZDI3OTA4MjUxIiwidXNlcl9pZCI6MTF9.Alc51Fs6LFFe8rEP8nn_BVmYMpywtk41yk0o9Lp3OpU
 
 {}
 
@@ -56,20 +56,20 @@ Authorization: Token  a83b082b8c70f390b9fc11b9c9d9ed627a2aa8fb
 ###
 POST http://127.0.0.1:8000/transactions/
 Content-Type: application/json
-Authorization: Token  a83b082b8c70f390b9fc11b9c9d9ed627a2aa8fb
+Authorization: Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM1ODk5NTk0LCJpYXQiOjE3MzU4OTkyOTQsImp0aSI6IjczYzVhMDRjYjJjMjRlYjM5NjUwMDYyZDI3OTA4MjUxIiwidXNlcl9pZCI6MTF9.Alc51Fs6LFFe8rEP8nn_BVmYMpywtk41yk0o9Lp3OpU
 
 {"listing":2}
-### 314bdeedf9730c7c9cce29eb3617ca5c23ecfbc5
+### 314bdeedf9730c7c9cce29eb3617ca5c23ecfbc5 the token is old, all of them are, because they will change after an hour. so it requieres manual change for testing
 
 PATCH http://127.0.0.1:8000/transactions/16/update/
 Content-Type: application/json
-Authorization: Token  314bdeedf9730c7c9cce29eb3617ca5c23ecfbc5
+Authorization: Bearer  314bdeedf9730c7c9cce29eb3617ca5c23ecfbc5
 
 {"status":"completed"}
 
 ###
 PATCH http://127.0.0.1:8000/transactions/17/update/
 Content-Type: application/json
-Authorization: Token  314bdeedf9730c7c9cce29eb3617ca5c23ecfbc5
+Authorization: Bearer  314bdeedf9730c7c9cce29eb3617ca5c23ecfbc5
 
 {"status":"cancelled"}
