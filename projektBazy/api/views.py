@@ -8,9 +8,22 @@ from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.pagination import PageNumberPagination
 
+class ListingPagination(PageNumberPagination):
+    page_size = 16  
+    page_size_query_param = 'page_size'  
+    max_page_size = 100 
+
+class ListingsPagination(PageNumberPagination):
+    page_size = 16  
+    page_size_query_param = 'page_size'  
+    max_page_size = 100 
 
 @api_view(['GET'])
 def getCategory(request):
@@ -23,10 +36,12 @@ def getCategory(request):
 @api_view(['GET'])
 def getData(request):
     listings = Listing.objects.all()
-    serializer = ListingSerializer(listings, many=True)
+    paginator = ListingPagination()
+    paginated_listings = paginator.paginate_queryset(listings, request)
+    serializer = ListingSerializer(paginated_listings, many=True)
     
     
-    return Response(serializer.data)
+    return paginator.get_paginated_response(serializer.data)
 #also unnessesary, user shouldnt be able to add categories, its just for testing 
 @api_view(['POST'])
 def addCategory(request):
@@ -44,23 +59,35 @@ def signup(request):
         user=User.objects.get(username=request.data['username'])
         user.set_password(request.data['password'])
         user.save()
-        token=Token.objects.create(user=user)
-        return Response({"token": token.key, "user": serializer.data})
+        #token=Token.objects.create(user=user)
+        return Response({ "user": serializer.data})
     return Response({serializer.errors})
-
 
 @api_view(['POST'])
 def login(request):
-    user=get_object_or_404(User, username=request.data['username'])
-    if not user.check_password(request.data['password']):
-        return Response({"detalil":"Not found."})
-    token, created= Token.objects.get_or_create(user=user)
-    serializer=UserSerializer(instance=user)
-    return Response({"token": token.key, "user": serializer.data})
+    username = request.data.get('username')
+    password = request.data.get('password')
 
+    user = get_object_or_404(User, username=username)
+    if not user.check_password(password):
+        return Response({"detail": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)  
+    refresh_token = str(refresh)  
+
+    serializer = UserSerializer(user)
+
+    return Response({
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "user": serializer.data
+    })
+
+#@authentication_classes([SessionAuthentication, TokenAuthentication])
 
 @api_view(['GET'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def test_token(request):
     return Response("22passed for {}".format(request.user.username))
@@ -79,10 +106,10 @@ def logout(request):
     
 #To test those go login in http://127.0.0.1:8000/admin/   username osboxes password osboxes.org i think that the database and all paswords go through git??? not sure, if not create admin yourself. actually i dont think it goes to git but still, you can make a admin by yourself. 
 #anyway, when you log as admin you can go back to the other urls and test all of those, and add more and stuff
-#i dont think i understand to good swagger yet :()
+#i dont think i understand swagger too well yet  :(
 @swagger_auto_schema(methods=['post'], request_body=ListingSerializer, responses={201: ListingSerializer})
 @api_view(['POST'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def post_listing(request):
     serializer=ListingSerializer(data=request.data,  context={'request': request})
@@ -90,7 +117,7 @@ def post_listing(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-@authentication_classes([SessionAuthentication, TokenAuthentication])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 class CreateListingView(generics.CreateAPIView):
     queryset = Listing.objects.all()
@@ -100,7 +127,7 @@ class CreateListingView(generics.CreateAPIView):
         serializer.save()
 
 @api_view(['POST'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def add_address(request):
     serializer=AdressSerializer(data=request.data,  context={'request': request})
@@ -111,6 +138,7 @@ def add_address(request):
 
 class ListingsView(generics.ListAPIView):
     serializer_class = ListingSerializer
+    pagination_class = ListingsPagination
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id') 
@@ -159,7 +187,7 @@ class UserAddressesView(generics.ListAPIView):
         return Address.objects.filter(resident=user)
 
 @api_view(['POST'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def create_transaction(request):
     if request.method == 'POST':
@@ -189,7 +217,7 @@ def create_transaction(request):
 
 #before i forget, patch only sends the data that is changed, so the objcet must be created before, i think you can create with put.
 @api_view(['PATCH'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def update_transaction_status(request, transaction_id):
     try:
@@ -226,7 +254,7 @@ def update_transaction_status(request, transaction_id):
     return Response(TransactionSerializer(transaction).data, status=status.HTTP_200_OK)
 
 @api_view(['PATCH'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def cancel_listing(request, listing_id):
     try:

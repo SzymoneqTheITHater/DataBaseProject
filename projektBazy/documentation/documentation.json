@@ -1,0 +1,446 @@
+swagger: '2.0'
+info:
+  title: ProjektBazy API
+  description: Dokumentacja API dla aplikacji ProjektBazy
+  termsOfService: https://www.google.com/policies/terms/
+  contact:
+    email: contact@projektbazy.local
+  license:
+    name: MIT License
+  version: v1
+host: 127.0.0.1:8000
+schemes:
+- http
+basePath: /
+consumes:
+- application/json
+produces:
+- application/json
+securityDefinitions:
+  Basic:
+    type: basic
+security:
+- Basic: []
+paths:
+  /:
+    get:
+      operationId: _list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Listing'
+      tags:
+      - ''
+    parameters: []
+  /add/:
+    post:
+      operationId: add_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - add
+    parameters: []
+  /categories/:
+    get:
+      operationId: categories_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - categories
+    parameters: []
+  /listing/{listing_id}/cancel/:
+    patch:
+      operationId: listing_cancel_partial_update
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - listing
+    parameters:
+    - name: listing_id
+      in: path
+      required: true
+      type: string
+  /listings/category/{category_id}/:
+    get:
+      operationId: listings_category_read
+      description: ''
+      parameters:
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      - name: page_size
+        in: query
+        description: Number of results to return per page.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Listing'
+      tags:
+      - listings
+    parameters:
+    - name: category_id
+      in: path
+      required: true
+      type: string
+  /listings/create/:
+    post:
+      operationId: listings_create_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Listing'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Listing'
+      tags:
+      - listings
+    parameters: []
+  /listings/user/{user_id}/:
+    get:
+      operationId: listings_user_read
+      description: ''
+      parameters:
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      - name: page_size
+        in: query
+        description: Number of results to return per page.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Listing'
+      tags:
+      - listings
+    parameters:
+    - name: user_id
+      in: path
+      required: true
+      type: string
+  /listings/user/{user_id}/category/{category_id}/:
+    get:
+      operationId: listings_user_category_read
+      description: ''
+      parameters:
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      - name: page_size
+        in: query
+        description: Number of results to return per page.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Listing'
+      tags:
+      - listings
+    parameters:
+    - name: user_id
+      in: path
+      required: true
+      type: string
+    - name: category_id
+      in: path
+      required: true
+      type: string
+  /login/:
+    post:
+      operationId: login_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - login
+    parameters: []
+  /logout/:
+    post:
+      operationId: logout_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - logout
+    parameters: []
+  /postAddress/:
+    post:
+      operationId: postAddress_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - postAddress
+    parameters: []
+  /postListing/:
+    post:
+      operationId: postListing_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Listing'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Listing'
+      tags:
+      - postListing
+    parameters: []
+  /signup/:
+    post:
+      operationId: signup_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - signup
+    parameters: []
+  /test_token/:
+    get:
+      operationId: test_token_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - test_token
+    parameters: []
+  /transactions/:
+    post:
+      operationId: transactions_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - transactions
+    parameters: []
+  /transactions/{transaction_id}/update/:
+    patch:
+      operationId: transactions_update_partial_update
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - transactions
+    parameters:
+    - name: transaction_id
+      in: path
+      required: true
+      type: string
+  /user/{user_id}/addresses/:
+    get:
+      operationId: user_addresses_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Adress'
+      tags:
+      - user
+    parameters:
+    - name: user_id
+      in: path
+      required: true
+      type: string
+definitions:
+  Listing:
+    required:
+    - title
+    - description
+    - price
+    - location
+    - seller
+    type: object
+    properties:
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      description:
+        title: Description
+        type: string
+        minLength: 1
+      price:
+        title: Price
+        type: number
+      location:
+        title: Location
+        type: string
+        maxLength: 255
+        minLength: 1
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+      category:
+        title: Category
+        type: integer
+        x-nullable: true
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      state:
+        title: State
+        type: string
+        enum:
+        - active
+        - bought
+        - pending
+        - cancelled
+      image:
+        title: Image
+        type: string
+        readOnly: true
+        x-nullable: true
+        format: uri
+      seller:
+        title: Seller
+        type: integer
+  Adress:
+    required:
+    - country
+    - town
+    - street
+    - postal_code
+    - building_number
+    type: object
+    properties:
+      country:
+        title: Country
+        type: string
+        maxLength: 63
+        minLength: 1
+      town:
+        title: Town
+        type: string
+        maxLength: 63
+        minLength: 1
+      street:
+        title: Street
+        type: string
+        maxLength: 63
+        minLength: 1
+      postal_code:
+        title: Postal code
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      building_number:
+        title: Building number
+        type: integer
+        maximum: 2147483647
+        minimum: -2147483648
+      id:
+        title: ID
+        type: integer
+        readOnly: true
