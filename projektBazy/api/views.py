@@ -13,6 +13,17 @@ from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.pagination import PageNumberPagination
+
+class ListingPagination(PageNumberPagination):
+    page_size = 16  
+    page_size_query_param = 'page_size'  
+    max_page_size = 100 
+
+class ListingsPagination(PageNumberPagination):
+    page_size = 16  
+    page_size_query_param = 'page_size'  
+    max_page_size = 100 
 
 @api_view(['GET'])
 def getCategory(request):
@@ -25,10 +36,12 @@ def getCategory(request):
 @api_view(['GET'])
 def getData(request):
     listings = Listing.objects.all()
-    serializer = ListingSerializer(listings, many=True)
+    paginator = ListingPagination()
+    paginated_listings = paginator.paginate_queryset(listings, request)
+    serializer = ListingSerializer(paginated_listings, many=True)
     
     
-    return Response(serializer.data)
+    return paginator.get_paginated_response(serializer.data)
 #also unnessesary, user shouldnt be able to add categories, its just for testing 
 @api_view(['POST'])
 def addCategory(request):
@@ -125,6 +138,7 @@ def add_address(request):
 
 class ListingsView(generics.ListAPIView):
     serializer_class = ListingSerializer
+    pagination_class = ListingsPagination
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id') 
