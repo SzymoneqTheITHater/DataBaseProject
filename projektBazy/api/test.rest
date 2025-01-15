@@ -3,15 +3,15 @@ GET http://127.0.0.1:8000/
 Content-Type: application/json
 
 ###
-GET http://127.0.0.1:8000/listings/category/2/
+GET http://127.0.0.1:8000/category/1/
 Content-Type: application/json
 
 ###
-GET http://127.0.0.1:8000/listings/user/4/
+GET http://127.0.0.1:8000/user/1/
 Content-Type: application/json
 
 ###
-GET http://127.0.0.1:8000/listings/user/4/category/2/
+GET http://127.0.0.1:8000/user/4/category/2/
 Content-Type: application/json
 
 ###
@@ -33,13 +33,13 @@ Content-Type:application/json
 
 GET http://127.0.0.1:8000/test_token 
 Content-Type:  application/json
-Authorization: Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM1ODk5NTk0LCJpYXQiOjE3MzU4OTkyOTQsImp0aSI6IjczYzVhMDRjYjJjMjRlYjM5NjUwMDYyZDI3OTA4MjUxIiwidXNlcl9pZCI6MTF9.Alc51Fs6LFFe8rEP8nn_BVmYMpywtk41yk0o9Lp3OpU
+Authorization: Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM2ODc0NTMwLCJpYXQiOjE3MzY4NzA5MzAsImp0aSI6IjA2MTVjYTEwNDkwMzQ5ODY4ZTQxYmFjYzE1ZmE1ZDcwIiwidXNlcl9pZCI6MTF9.mb7zobbAWSNMMnPV4auDQ14Jsi1DKDDhVCAZRc9tiAc
 
 {}
 ###
 POST http://127.0.0.1:8000/postAddress/
 Content-Type: application/json
-Authorization: Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM1ODk5NTk0LCJpYXQiOjE3MzU4OTkyOTQsImp0aSI6IjczYzVhMDRjYjJjMjRlYjM5NjUwMDYyZDI3OTA4MjUxIiwidXNlcl9pZCI6MTF9.Alc51Fs6LFFe8rEP8nn_BVmYMpywtk41yk0o9Lp3OpU
+Authorization: Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM2ODc5NzQ5LCJpYXQiOjE3MzY4NzYxNDksImp0aSI6IjQ2ODdhNjg5ZjExNDQ1Mzk5ZmEyZjMwMzQ5MDFhNTFmIiwidXNlcl9pZCI6MTF9.2azsOUOMoM2-aor_mnSSL3zRsjUMyYC5m1EF5VELEmQ
 
 
 {"country":"Poland","town":"wroclaw","street":"szkolna","postal_code":57123,"building_number":4}
