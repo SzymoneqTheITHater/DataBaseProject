@@ -148,6 +148,8 @@ class ListingsView(generics.ListAPIView):
         user_id = self.kwargs.get('user_id') 
         category_id = self.kwargs.get('category_id')
 
+        if user_id == 0 and category_id == 0:
+            return Listing.objects.all()
         if user_id and not category_id:        
             try:
                 user = User.objects.get(id=user_id)
